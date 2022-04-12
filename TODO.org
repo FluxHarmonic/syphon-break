@@ -1,0 +1,34 @@
+#+title: Syphon Break - Tasks
+
+* Gameplay
+** TODO Add pickup objects (shield, energy, maybe weapon?)
+** TODO Add manual shielding which also depletes
+** TODO Restrict gameplay to the visible area (sans HUD)
+** TODO Add powerups that are dropped randomly
+*** TODO Speed boost
+*** TODO Energy recharge speed boost
+*** TODO General energy boost
+*** TODO Syphon range extender
+*** TODO Screen bomb
+** TODO Polish up the main menu
+*** TODO High Score screen
+*** TODO Controller setup (or at least a help screen)
+*** TODO Credits screen?
+** TODO Add a few more types of enemies
+*** TODO Especially those with more elaborate movement patterns or groupings
+*** TODO Also add end-level bosses?
+*** TODO More complex hitboxes (multiple spheres)
+** TODO Create a more interesting overall goal
+*** TODO Maybe finding pieces to repair your ship to escape the region
+** TODO More weapons for the player?
+
+* Graphics
+** TODO Implement proper scaling for HiDPI screens
+** TODO Create sprite graphics for everything and polish them over time
+*** TODO Sprites for bullets
+*** TODO Sprites for player and enemies
+*** TODO HUD sprite design
+** TODO Visual effects with shaders
+*** TODO Add a CRT shader
+*** TODO Particle effects with blur?
+** TODO Starfield display in the background
