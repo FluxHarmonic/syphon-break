@@ -1,15 +1,16 @@
 #+title: Syphon Break - Tasks
 
 * Gameplay
-** TODO Add pickup objects (shield, energy, maybe weapon?)
-** TODO Add manual shielding which also depletes
-** TODO Restrict gameplay to the visible area (sans HUD)
 ** TODO Add powerups that are dropped randomly
+*** TODO General energy boost
 *** TODO Speed boost
 *** TODO Energy recharge speed boost
-*** TODO General energy boost
 *** TODO Syphon range extender
 *** TODO Screen bomb
+*** TODO Time dilation - slow down enemies and bullets but not player
+** TODO Add manual shielding which also depletes
+** TODO Damage when colliding with an enemy ship
+** TODO Restrict gameplay to the visible area (sans HUD)
 ** TODO Polish up the main menu
 *** TODO High Score screen
 *** TODO Controller setup (or at least a help screen)
@@ -24,6 +25,7 @@
 
 * Graphics
 ** TODO Implement proper scaling for HiDPI screens
+** TODO Render some kind of graphic/effect for siphoning energy
 ** TODO Create sprite graphics for everything and polish them over time
 *** TODO Sprites for bullets
 *** TODO Sprites for player and enemies
