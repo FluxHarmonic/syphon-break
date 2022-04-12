@@ -1,0 +1,130 @@
+(define-module (syphon powerup)
+  (import (mesche array)
+          (mesche list)
+          (mesche math)
+          (substratic renderer)
+          (substratic physics)
+          (substratic window)
+          (syphon player)))
+
+(define-record-type powerup
+  (fields x y
+          vel-x vel-y
+          size
+          color
+          sphere
+          effect))
+
+(define (update-powerups powerups time-delta window) :export
+  (let next-powerup ((powerups powerups)
+                   (new-powerups '()))
+    (if (pair? powerups)
+        (let ((powerup (car powerups)))
+          ;; Increase the life time
+          ;; (powerup-life-time-set! powerup (+ (powerup-life-time powerup) time-delta))
+
+          ;; Update the powerup
+          ;; ((powerup-update-func powerup) powerup time-delta)
+
+          ;; Update the position
+          (powerup-x-set! powerup (+ (powerup-x powerup)
+                                     (* (powerup-vel-x powerup) time-delta)))
+          (powerup-y-set! powerup (+ (powerup-y powerup)
+                                     (* (powerup-vel-y powerup) time-delta)))
+
+          ;; Set the sphere center
+          (sphere-center-x-set! (powerup-sphere powerup)
+                                (powerup-x powerup))
+          (sphere-center-y-set! (powerup-sphere powerup)
+                                (powerup-y powerup))
+
+          ;; Check if powerup is still on screen
+          (if (< (powerup-y powerup)
+                 (window-height window))
+              (set! new-powerups (cons powerup new-powerups)))
+
+          (next-powerup (cdr powerups) new-powerups))
+
+        ;; Return the updated powerups list
+        new-powerups)))
+
+(define (render-powerups renderer powerups) :export
+  (let next-powerup ((powerups powerups))
+    (if (pair? powerups)
+        (let ((powerup (car powerups)))
+          ;; Render the powerup
+          (renderer-draw-rect renderer
+                              (- (powerup-x powerup)
+                                 (/ (powerup-size powerup) 2))
+                              (- (powerup-y powerup)
+                                 (/ (powerup-size powerup) 2))
+                              (powerup-size powerup)
+                              (powerup-size powerup)
+                              (powerup-color powerup))
+
+          (next-powerup (cdr powerups))))))
+
+;; This will be adjusted over time
+(define powerup-spawn-interval-base 0.5)
+(define powerup-spawn-interval-range 2.0)
+(define powerup-spawn-interval-scale 1.0)
+(define powerup-spawn-time 0)
+
+(define (spawn-powerups powerups total-level-time max-level-time time-delta window) :export
+  (set! powerup-spawn-time (+ powerup-spawn-time time-delta))
+  (if (> powerup-spawn-time
+         (+ (* powerup-spawn-interval-range
+               (/ (- max-level-time total-level-time)
+                  max-level-time))
+            powerup-spawn-interval-base))
+      (begin
+        (set! powerup-spawn-time 0)
+        ;; Call the spawner function, passing the window.  Add the result
+        ;; to the powerup list
+        (cons ((array-nth powerup-spawners
+                          (rand-int (array-length powerup-spawners)))
+               window)
+              powerups))
+      powerups))
+
+;;; -- Effects --
+
+(define (update-effects effects player time-delta) :export
+  (let next-effect ((effects effects)
+                    (new-effects '()))
+    (if (pair? effects)
+        (next-effect (cdr effects)
+                     (if ((car effects) player time-delta)
+                         (cons (car effects) new-effects)))
+        new-effects)))
+
+
+;;; -- Powerup Implementations --
+
+(define (make-energy-powerup-effect energy-amount) :export
+  (let ((current-time 0)
+        (duration 3))
+    (lambda (player time-delta)
+      (set! current-time (+ current-time time-delta))
+      (if (< current-time duration)
+          (player-energy-amount-set! player
+                                     (min 100
+                                          (+ (player-energy-amount player)
+                                             (* (/ energy-amount duration)
+                                                time-delta))))))))
+
+(define (spawn-energy-powerup window)
+  (let ((x (rand-int (- (window-width window) 100)))
+        (y -100)
+        (size 85))
+    (make-powerup :x x
+                  :y y
+                  :vel-x 0
+                  :vel-y 300
+                  :color (rgb 255 135 84)
+                  :size size
+                  :sphere (make-sphere x y (/ size 2))
+                  :effect (make-energy-powerup-effect 20))))
+
+(define powerup-spawners (make-array))
+(array-push powerup-spawners spawn-energy-powerup)

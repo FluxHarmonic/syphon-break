@@ -1,4 +1,4 @@
-(define-module (flux-harmonic silent-syphon)
+(define-module (flux-harmonic syphon-break)
   (import (mesche fs)
           (mesche list)
           (mesche string)
@@ -6,8 +6,8 @@
           (mesche build)
           (mesche project)))
 
-(project :name "Silent Syphon"
-         :url "https://github.com/FluxHarmonic/ld50-silent-syphon"
+(project :name "Syphon Break"
+         :url "https://github.com/FluxHarmonic/syphon-break"
          :version "0.0.1"
          :description "How long can you survive before energy runs out?"
 
@@ -39,7 +39,7 @@
                                                        :mesche-main "modules/main.msc")
 
                                        ;; Build and link CLI source files
-                                       (link-program "silent-syphon")))
+                                       (link-program "syphon-break")))
 
                         (target :name "dist"
                                 :runs (steps (build-target "main")
@@ -48,7 +48,7 @@
                                                (path-ensure "./dist")
                                                (process-start-sync (string-append "cp "
                                                                                   (project-config-output-path config)
-                                                                                  "/silent-syphon "
+                                                                                  "/syphon-break "
                                                                                   "dist/"))
                                                (process-start-sync "cp -R ./modules ./dist")
                                                (process-start-sync "cp -R ./assets ./dist")

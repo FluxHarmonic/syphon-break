@@ -14,11 +14,12 @@
           (syphon enemy)
           (syphon input)
           (syphon player)
+          (syphon powerup)
           (syphon weapon)
           (syphon bullet)
           (syphon collision)))
 
-(define window (window-create 1280 720 "Silent Syphon"))
+(define window (window-create 1280 720 "Syphon Break"))
 (define input-state (input-init window))
 (define renderer (renderer-create window))
 
@@ -48,7 +49,9 @@
           score-current
           level-time
           enemies
-          bullets))
+          bullets
+          effects
+          powerups))
 
 (define (initialize-game)
   (make-game :state 'playing
@@ -58,7 +61,8 @@
              :score-current 0
              :level-time 0
              :enemies '()
-             :bullets '()))
+             :bullets '()
+             :powerups '()))
 
 (define (end-game game state)
   (game-state-set! game state)
@@ -217,7 +221,6 @@
                                'alive))
                   (end-game current-game (player-state (game-player current-game)))
                   (begin
-
                     ;; Update bullets
                     (game-bullets-set! current-game
                                        (update-bullets (game-bullets current-game)
@@ -239,7 +242,30 @@
                                                        time-delta
                                                        window))
 
+                    ;; Spawn and update powerups
+                    (game-powerups-set! current-game
+                                        (spawn-powerups (game-powerups current-game)
+                                                        (game-level-time current-game)
+                                                        max-level-time
+                                                        time-delta
+                                                        window))
+                    (game-powerups-set! current-game
+                                        (update-powerups (game-powerups current-game)
+                                                         time-delta
+                                                         window))
+
+                    ;; Apply effects
+                    (game-effects-set! current-game
+                                       (update-effects (game-effects current-game)
+                                                       (game-player current-game)
+                                                       time-delta))
+
                     ;; Siphon energy if necessary
+                    (if (controller-siphon (game-controller current-game))
+                        (siphon-energy current-game
+                                       (game-player current-game)
+                                       (game-enemies current-game)
+                                       time-delta))
                     (if (controller-siphon (game-controller current-game))
                         (siphon-energy current-game
                                        (game-player current-game)
@@ -250,6 +276,7 @@
                     (check-collisions (game-player current-game)
                                       (game-enemies current-game)
                                       (game-bullets current-game)
+                                      (game-powerups current-game)
                                       (lambda (enemy)
                                         ;; Give the player some score
                                         (game-score-total-set! current-game
@@ -287,6 +314,9 @@
   ;; Render the enemies
   (render-enemies renderer (game-enemies current-game))
 
+  ;; Render the powerups
+  (render-powerups renderer (game-powerups current-game))
+
   ;; Render the HUD
   (render-hud renderer
               current-game
@@ -319,7 +349,7 @@
                      (- (window-width window) 220)
                      60))))
 
-(define title-text "Silent Syphon")
+(define title-text "Syphon Break")
 (define title-width (font-text-width result-font title-text))
 
 (define start-text "Press Space to Start")

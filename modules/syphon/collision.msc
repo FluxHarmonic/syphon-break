@@ -3,9 +3,10 @@
           (substratic physics)
           (syphon enemy)
           (syphon player)
-          (syphon bullet)))
+          (syphon bullet)
+          (syphon powerup)))
 
-(define (check-collisions player enemies bullets hit-enemy-func) :export
+(define (check-collisions player enemies bullets powerups hit-enemy-func) :export
   (let next-bullet ((bullets bullets))
     ;; Check for sphere of bullet vs sphere of entity
     (if (pair? bullets)
@@ -33,4 +34,13 @@
                         (player-shield-amount-set! player
                                                    (- (player-shield-amount player)
                                                       (bullet-damage bullet)))))))
-          (next-bullet (cdr bullets))))))
+          (next-bullet (cdr bullets)))))
+
+  ;; Check for collisions against powerups
+  (let next-powerup ((powerups powerups))
+    (if (pair? powerups)
+        (begin
+          (if (sphere-intersect? (player-sphere player)
+                                 (powerup-sphere (car powerups)))
+              (display "Hit powerup!\n"))
+          (next-powerup (cdr powerups))))))
