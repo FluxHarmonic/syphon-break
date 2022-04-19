@@ -73,6 +73,14 @@
         (set! result-text depleted-text)
         (set! result-width depleted-width))))
 
+;;; -- Powerups --
+
+(define powerup-spawners (make-array))
+
+;; Player powerups
+(array-push powerup-spawners spawn-energy-powerup)
+(array-push powerup-spawners spawn-speed-powerup)
+
 ;;; -- HUD --
 
 (define hud-width 250)
@@ -243,7 +251,8 @@
 
                     ;; Spawn and update powerups
                     (game-powerups-set! current-game
-                                        (spawn-powerups (game-powerups current-game)
+                                        (spawn-powerups powerup-spawners
+                                                        (game-powerups current-game)
                                                         (game-level-time current-game)
                                                         max-level-time
                                                         time-delta

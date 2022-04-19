@@ -5,8 +5,7 @@
           (substratic renderer)
           (substratic physics)
           (substratic window)
-          (syphon effect)
-          (syphon player)))
+          (syphon effect)))
 
 (define-record-type powerup
   (fields x y
@@ -68,7 +67,7 @@
 (define powerup-spawn-interval-scale 1.0)
 (define powerup-spawn-time 0)
 
-(define (spawn-powerups powerups total-level-time max-level-time time-delta window) :export
+(define (spawn-powerups powerup-spawners powerups total-level-time max-level-time time-delta window) :export
   (set! powerup-spawn-time (+ powerup-spawn-time time-delta))
   (if (> powerup-spawn-time
          (+ (* powerup-spawn-interval-range
@@ -84,48 +83,3 @@
                window)
               powerups))
       powerups))
-
-;;; -- Powerup Implementations --
-
-(define energy-powerup-effect-color (rgb 255 0 0))
-
-(define (energy-powerup-effect-renderer renderer player)
-  (renderer-draw-rect renderer
-                      ;; Center the glyph below the player ship
-                      (- (player-x player) 15)
-                      (+ 15 (+ (player-y player) (/ player-size 2)))
-                      30 30
-                      energy-powerup-effect-color))
-
-(define (make-energy-powerup-effect energy-amount) :export
-  (let ((current-time 0)
-        (duration 3))
-    (lambda (player enemies)
-      (player-add-effect!
-       player
-       (make-effect :updater (lambda (player time-delta)
-                               (set! current-time (+ current-time time-delta))
-                               (if (< current-time duration)
-                                   (player-energy-amount-set! player
-                                                              (min 100
-                                                                   (+ (player-energy-amount player)
-                                                                      (* (/ energy-amount duration)
-                                                                         time-delta))))))
-                    :renderer energy-powerup-effect-renderer)))))
-
-(define (spawn-energy-powerup window)
-  (let ((x (rand-int (- (window-width window) 100)))
-        (y -100)
-        (size 85))
-    (make-powerup :x x
-                  :y y
-                  :vel-x 0
-                  :vel-y 300
-                  :alive t
-                  :color (rgb 255 135 84)
-                  :size size
-                  :sphere (make-sphere x y (/ size 2))
-                  :applicator (make-energy-powerup-effect 20))))
-
-(define powerup-spawners (make-array))
-(array-push powerup-spawners spawn-energy-powerup)

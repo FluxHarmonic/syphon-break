@@ -7,6 +7,7 @@
           (substratic renderer)
           (syphon effect)
           (syphon input)
+          (syphon powerup)
           (syphon weapon)))
 
 (define-record-type player
@@ -39,7 +40,8 @@
 ;; Define some game state
 (define player-ship-color (rgb 100 100 255))
 (define player-size 80 :export)
-(define player-move-speed 500)            ; Pixels per second
+(define player-default-move-speed 500)
+(define player-move-speed player-default-move-speed)            ; Pixels per second
 (define player-energy-depletion 1)
 
 (define (player-fire-weapon player weapon new-bullet-func time-delta)
@@ -161,3 +163,90 @@
 
 (define (player-add-effect! player effect) :export
   (player-effects-set! player (cons effect (player-effects player))))
+
+;;; -- Powerup Implementations --
+
+(define energy-powerup-effect-color (rgb 255 0 0))
+
+(define (energy-powerup-effect-renderer renderer player)
+  (renderer-draw-rect renderer
+                      ;; Center the glyph below the player ship
+                      (- (player-x player) 15)
+                      (+ 15 (+ (player-y player) (/ player-size 2)))
+                      30 30
+                      energy-powerup-effect-color))
+
+(define (make-energy-powerup-effect energy-amount)
+  (let ((current-time 0)
+        (duration 3))
+    (lambda (player enemies)
+      (player-add-effect!
+       player
+       (make-effect :updater (lambda (player time-delta)
+                               (set! current-time (+ current-time time-delta))
+                               (if (< current-time duration)
+                                   (player-energy-amount-set! player
+                                                              (min 100
+                                                                   (+ (player-energy-amount player)
+                                                                      (* (/ energy-amount duration)
+                                                                         time-delta))))))
+                    :renderer energy-powerup-effect-renderer)))))
+
+(define (spawn-energy-powerup window) :export
+  (let ((x (rand-int (- (window-width window) 100)))
+        (y -100)
+        (size 85))
+    (make-powerup :x x
+                  :y y
+                  :vel-x 0
+                  :vel-y 300
+                  :alive t
+                  :color (rgb 255 135 84)
+                  :size size
+                  :sphere (make-sphere x y (/ size 2))
+                  :applicator (make-energy-powerup-effect 20))))
+
+;;; Speed powerup
+
+(define speed-powerup-color (rgb 197 255 97))
+
+;; TODO: Add a particle effect coming from behind the ship to make it look like
+;; it has improved boosters
+(define (speed-powerup-effect-renderer renderer player)
+  (renderer-draw-rect renderer
+                      ;; Center the glyph below the player ship
+                      (+ 25 (- (player-x player) 15))
+                      (+ 15 (+ (player-y player) (/ player-size 2)))
+                      30 30
+                      speed-powerup-color))
+
+(define (make-speed-powerup-effect new-speed)
+  (let ((current-time 0)
+        (duration 5))
+    (lambda (player enemies)
+      (player-add-effect!
+       player
+       (make-effect :updater (lambda (player time-delta)
+                               (set! current-time (+ current-time time-delta))
+                               (if (< current-time duration)
+                                   (set! player-move-speed new-speed)
+                                   (begin
+                                     ;; Set the speed back to default and return nil to
+                                     ;; remove the effect
+                                     (set! player-move-speed player-default-move-speed)
+                                     nil)))
+                    :renderer speed-powerup-effect-renderer)))))
+
+(define (spawn-speed-powerup window) :export
+  (let ((x (rand-int (- (window-width window) 100)))
+        (y -100)
+        (size 85))
+    (make-powerup :x x
+                  :y y
+                  :vel-x 0
+                  :vel-y 500
+                  :alive t
+                  :color speed-powerup-color
+                  :size size
+                  :sphere (make-sphere x y (/ size 2))
+                  :applicator (make-speed-powerup-effect 700))))
