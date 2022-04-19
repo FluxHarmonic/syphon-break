@@ -1,0 +1,16 @@
+(define-module (syphon effect)
+  (import (mesche list)
+          (mesche math)))
+
+(define (update-effects effects target time-delta) :export
+  (let next-effect ((effects effects)
+                    (new-effects '()))
+    (if (pair? effects)
+        ;; Update the effect for the specific target
+        (next-effect (cdr effects)
+                     (if ((car effects) target time-delta)
+                         (cons (car effects) new-effects)
+                         new-effects))
+
+        ;; Return the updated effects list
+        new-effects)))

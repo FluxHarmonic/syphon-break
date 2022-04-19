@@ -1,9 +1,11 @@
 (define-module (syphon player)
-  (import (mesche math)
+  (import (mesche list)
+          (mesche math)
           (substratic input)
           (substratic window)
           (substratic physics)
           (substratic renderer)
+          (syphon effect)
           (syphon input)
           (syphon weapon)))
 
@@ -12,6 +14,7 @@
           vel-x vel-y
           state
           sphere
+          effects
           weapon
           fire-time
           shield-amount
@@ -23,6 +26,7 @@
                :vel-x 0
                :vel-y 0
                :state 'alive
+               :effects '()
                :sphere (make-sphere player-x player-y (/ player-size 2))
                :weapon (make-weapon :damage 10
                                     :bullet-speed 700
@@ -78,7 +82,11 @@
 (define (deplete-player player time-delta)
   (player-energy-amount-set! player
                              (- (player-energy-amount player)
-                                (* player-energy-depletion time-delta))))
+                                (* player-energy-depletion time-delta)))
+
+  ;; Are we out of energy?
+  (if (< (player-energy-amount player) 1)
+      (player-state-set! player 'depleted)))
 
 (define player-move-depletion 0.005)
 
@@ -110,16 +118,17 @@
   ;; Is the player still alive
   (if (> (player-shield-amount player) 0)
       (begin
+        ;; Apply effects
+        (player-effects-set! player
+                             (update-effects (player-effects player)
+                                             player
+                                             time-delta))
+
         ;; Deplete energy
         (deplete-player player time-delta)
 
         ;; Read controller state
         (read-controller player controller time-delta)
-
-        ;; Are we out of energy?
-        (if (< (player-energy-amount player) 1)
-            (begin
-              (player-state-set! player 'depleted)))
 
         ;; Move the player based on velocity
         (move-player player time-delta)
@@ -148,3 +157,6 @@
                       (- (player-y player) (/ player-size 2))
                       player-size player-size
                       player-ship-color))
+
+(define (player-add-effect! player effect) :export
+  (player-effects-set! player (cons effect (player-effects player))))

@@ -42,5 +42,9 @@
         (begin
           (if (sphere-intersect? (player-sphere player)
                                  (powerup-sphere (car powerups)))
-              (display "Hit powerup!\n"))
+              (begin
+                ;; Remove the powerup from the screen and add its effect to the
+                ;; player
+                (powerup-alive-set! (car powerups) nil)
+                ((powerup-applicator (car powerups)) player enemies)))
           (next-powerup (cdr powerups))))))

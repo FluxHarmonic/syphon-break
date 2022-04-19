@@ -50,7 +50,6 @@
           level-time
           enemies
           bullets
-          effects
           powerups))
 
 (define (initialize-game)
@@ -253,12 +252,6 @@
                                         (update-powerups (game-powerups current-game)
                                                          time-delta
                                                          window))
-
-                    ;; Apply effects
-                    (game-effects-set! current-game
-                                       (update-effects (game-effects current-game)
-                                                       (game-player current-game)
-                                                       time-delta))
 
                     ;; Siphon energy if necessary
                     (if (controller-siphon (game-controller current-game))
