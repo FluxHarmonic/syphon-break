@@ -2,11 +2,23 @@
 
 * Gameplay
 ** TODO Add powerups that are dropped randomly
-*** TODO General energy boost
-*** TODO Speed boost
-*** TODO Energy recharge speed boost
+*** DONE General energy boost
+CLOSED: [2022-04-19 Tue 18:09]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-04-19 Tue 18:09]
+:END:
+*** DONE Speed boost
+CLOSED: [2022-04-19 Tue 18:25]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-04-19 Tue 18:25]
+:END:
+*** DONE Screen bomb (hurt enemies on screen)
+CLOSED: [2022-04-19 Tue 19:10]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-04-19 Tue 19:10]
+:END:
+*** TODO Energy syphon speed boost
 *** TODO Syphon range extender
-*** TODO Screen bomb
 *** TODO Time dilation - slow down enemies and bullets but not player
 ** TODO Add manual shielding which also depletes
 ** TODO Damage when colliding with an enemy ship
