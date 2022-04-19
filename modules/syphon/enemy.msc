@@ -6,6 +6,7 @@
           (substratic window)
           (substratic physics)
           (substratic renderer)
+          (syphon effect)
           (syphon weapon)))
 
 ;;; -- Enemies --
@@ -29,7 +30,9 @@
           score
           color
           shield
+          shield-max
           sphere
+          effects
           weapon
           siphon-rate
           life-time
@@ -71,8 +74,10 @@
                 :base-x x
                 :size size
                 :shield 20
+                :shield-max 20
                 :score 100
                 :sphere (make-sphere x y (/ size 2))
+                :effects '()
                 :weapon blaster-weapon
                 :siphon-rate 5
                 :life-time 0
@@ -98,8 +103,10 @@
                 :base-x x
                 :size size
                 :shield 10
+                :shield-max 10
                 :score 100
                 :sphere (make-sphere x y (/ size 2))
+                :effects '()
                 :weapon blaster-weapon
                 :siphon-rate 10
                 :life-time 0
@@ -124,6 +131,12 @@
               (begin
                 ;; Increase the life time
                 (enemy-life-time-set! enemy (+ (enemy-life-time enemy) time-delta))
+
+                ;; Apply effects
+                (enemy-effects-set! enemy
+                                    (update-effects (enemy-effects enemy)
+                                                    enemy
+                                                    time-delta))
 
                 ;; Update the enemy
                 ((enemy-update-func enemy) enemy time-delta)
@@ -175,4 +188,10 @@
                               (enemy-size enemy)
                               (enemy-color enemy))
 
+          ;; Render enemy effects
+          (render-effects renderer (enemy-effects enemy) enemy)
+
           (next-enemy (cdr enemies))))))
+
+(define (enemy-add-effect! enemy effect) :export
+  (enemy-effects-set! enemy (cons effect (enemy-effects enemy))))

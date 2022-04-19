@@ -7,7 +7,7 @@
           left right
           fire
           siphon
-          shield))
+          use-item))
 
 (define (create-controller) :export
   (make-controller :up nil
@@ -16,6 +16,7 @@
                    :right nil
                    :fire nil
                    :siphon nil
+                   :use-item nil
                    :shield nil))
 
 (define (up-command controller input-event)
@@ -42,8 +43,13 @@
   (controller-siphon-set! controller
                           (input-event-key-down? input-event)))
 
+(define (use-item-command controller input-event)
+  (controller-use-item-set! controller
+                            (input-event-key-down? input-event)))
+
 ;; Controls:
 ;; WSAD for directional
+;; H to use item
 ;; J to siphon
 ;; K to shoot
 
@@ -52,6 +58,7 @@
         (cons input-key-code-s down-command)
         (cons input-key-code-a left-command)
         (cons input-key-code-d right-command)
+        (cons input-key-code-h use-item-command)
         (cons input-key-code-j siphon-command)
         (cons input-key-code-k fire-command)))
 

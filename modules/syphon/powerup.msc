@@ -16,6 +16,10 @@
           sphere
           applicator))
 
+(define-record-type item
+  (fields color                         ; TODO: This will be 'sprite'
+          applicator))
+
 (define (update-powerups powerups time-delta window) :export
   (let next-powerup ((powerups powerups)
                      (new-powerups '()))

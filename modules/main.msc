@@ -80,6 +80,7 @@
 ;; Player powerups
 (array-push powerup-spawners spawn-energy-powerup)
 (array-push powerup-spawners spawn-speed-powerup)
+(array-push powerup-spawners spawn-heatwave-powerup)
 
 ;;; -- HUD --
 
@@ -268,11 +269,11 @@
                                        (game-player current-game)
                                        (game-enemies current-game)
                                        time-delta))
-                    (if (controller-siphon (game-controller current-game))
-                        (siphon-energy current-game
-                                       (game-player current-game)
-                                       (game-enemies current-game)
-                                       time-delta))
+
+                    ;; Use item if necessary
+                    (if (controller-use-item (game-controller current-game))
+                        (player-use-item (game-player current-game)
+                                         (game-enemies current-game)))
 
                     ;; Check for collisions
                     (check-collisions (game-player current-game)
@@ -420,7 +421,6 @@
 
 (define current-updater menu-updater)
 (define current-renderer menu-renderer)
-
 
 ;; This will run the game functions until the updater returns nil
 (run-engine-loop :renderer renderer

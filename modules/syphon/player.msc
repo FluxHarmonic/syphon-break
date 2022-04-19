@@ -1,11 +1,13 @@
 (define-module (syphon player)
   (import (mesche list)
           (mesche math)
+          (mesche string)
           (substratic input)
           (substratic window)
           (substratic physics)
           (substratic renderer)
           (syphon effect)
+          (syphon enemy)
           (syphon input)
           (syphon powerup)
           (syphon weapon)))
@@ -15,6 +17,7 @@
           vel-x vel-y
           state
           sphere
+          held-item
           effects
           weapon
           fire-time
@@ -27,6 +30,7 @@
                :vel-x 0
                :vel-y 0
                :state 'alive
+               :held-item nil
                :effects '()
                :sphere (make-sphere player-x player-y (/ player-size 2))
                :weapon (make-weapon :damage 10
@@ -159,10 +163,31 @@
                       (- (player-y player) (/ player-size 2))
                       player-size player-size
                       player-ship-color)
+
+  ;; Render player effects
   (render-effects renderer (player-effects player) player))
 
 (define (player-add-effect! player effect) :export
   (player-effects-set! player (cons effect (player-effects player))))
+
+;;; Item holding and usage
+
+(define (player-use-item player enemies) :export
+  (if (player-held-item player)
+      (begin
+        (display "Using item!\n")
+
+        ;; Run the item's applicator function
+        ((item-applicator (player-held-item player)) player enemies)
+
+        ;; Clear the held item
+        (player-held-item-set! player nil))))
+
+(define (player-item-applicator item)
+  ;; TODO: Draw this in the HUD!
+  (display "Player picked up item!\n")
+  (lambda (player enemies)
+    (player-held-item-set! player item)))
 
 ;;; -- Powerup Implementations --
 
@@ -250,3 +275,61 @@
                   :size size
                   :sphere (make-sphere x y (/ size 2))
                   :applicator (make-speed-powerup-effect 700))))
+
+;;; Heatwave weapon "powerup"
+
+(define heatwave-powerup-color (rgb 255 186 66))
+
+;; TODO: Add a particle effect coming from behind the ship to make it look like
+;; it is on fire!
+(define (heatwave-damage-effect-renderer renderer enemy)
+  (renderer-draw-rect renderer
+                      (+ 25 (- (enemy-x enemy) 15))
+                      (+ 15 (+ (enemy-y enemy) (/ (enemy-size enemy) 2)))
+                      30 30
+                      heatwave-powerup-color))
+
+(define (make-heatwave-damage-effect damage-amount)
+  (let ((current-time 0)
+        (duration 3))
+    (lambda (player enemies)
+      ;; Add the damage effect to all enemies within a specific radius of the
+      ;; player
+      (let next-enemy ((enemies enemies))
+        (if (pair? enemies)
+            (begin
+              (display "Applying heatwave effect to enemy!\n")
+              ;; Add the damage effect
+              (enemy-add-effect! (car enemies)
+                                 (make-effect :updater (lambda (enemy time-delta)
+                                                         (set! current-time (+ current-time time-delta))
+                                                         (if (< current-time duration)
+                                                             (begin
+                                                               (enemy-shield-set! enemy
+                                                                                  (max 0
+                                                                                       (- (enemy-shield enemy)
+                                                                                          (* (/ damage-amount duration)
+                                                                                             time-delta))))
+                                                               ;; (display (string-append "Shield is now: " (number->string (enemy-shield enemy)) "\n"))
+                                                               )))
+                                              :renderer heatwave-damage-effect-renderer))
+
+              (next-enemy (cdr enemies))))))))
+
+(define (spawn-heatwave-powerup window) :export
+  (let ((x (rand-int (- (window-width window) 100)))
+        (y -100)
+        (size 85))
+    (make-powerup :x x
+                  :y y
+                  :vel-x 0
+                  :vel-y 500
+                  :alive t
+                  :color heatwave-powerup-color
+                  :size size
+                  :sphere (make-sphere x y (/ size 2))
+                  :applicator (player-item-applicator
+                               (make-item :color heatwave-powerup-color
+                                          :applicator (make-heatwave-damage-effect 20)
+                                          ;; (make-heatwave-damage-effect 10)
+                                          )))))
