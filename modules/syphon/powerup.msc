@@ -87,20 +87,31 @@
 
 ;;; -- Powerup Implementations --
 
+(define energy-powerup-effect-color (rgb 255 0 0))
+
+(define (energy-powerup-effect-renderer renderer player)
+  (renderer-draw-rect renderer
+                      ;; Center the glyph below the player ship
+                      (- (player-x player) 15)
+                      (+ 15 (+ (player-y player) (/ player-size 2)))
+                      30 30
+                      energy-powerup-effect-color))
+
 (define (make-energy-powerup-effect energy-amount) :export
   (let ((current-time 0)
         (duration 3))
     (lambda (player enemies)
       (player-add-effect!
        player
-       (lambda (player time-delta)
-         (set! current-time (+ current-time time-delta))
-         (if (< current-time duration)
-             (player-energy-amount-set! player
-                                        (min 100
-                                             (+ (player-energy-amount player)
-                                                (* (/ energy-amount duration)
-                                                   time-delta))))))))))
+       (make-effect :updater (lambda (player time-delta)
+                               (set! current-time (+ current-time time-delta))
+                               (if (< current-time duration)
+                                   (player-energy-amount-set! player
+                                                              (min 100
+                                                                   (+ (player-energy-amount player)
+                                                                      (* (/ energy-amount duration)
+                                                                         time-delta))))))
+                    :renderer energy-powerup-effect-renderer)))))
 
 (define (spawn-energy-powerup window)
   (let ((x (rand-int (- (window-width window) 100)))

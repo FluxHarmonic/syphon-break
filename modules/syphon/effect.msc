@@ -2,15 +2,27 @@
   (import (mesche list)
           (mesche math)))
 
+(define-record-type effect
+  (fields renderer
+          updater))
+
 (define (update-effects effects target time-delta) :export
   (let next-effect ((effects effects)
                     (new-effects '()))
     (if (pair? effects)
         ;; Update the effect for the specific target
         (next-effect (cdr effects)
-                     (if ((car effects) target time-delta)
+                     (if ((effect-updater (car effects)) target time-delta)
                          (cons (car effects) new-effects)
                          new-effects))
 
         ;; Return the updated effects list
         new-effects)))
+
+(define (render-effects renderer effects target) :export
+  (let next-effect ((effects effects))
+    (if (pair? effects)
+        ;; Render the effect for the specific target
+        (begin
+          ((effect-renderer (car effects)) renderer target)
+          (next-effect (cdr effects))))))

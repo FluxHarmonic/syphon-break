@@ -156,7 +156,8 @@
                       (- (player-x player) (/ player-size 2))
                       (- (player-y player) (/ player-size 2))
                       player-size player-size
-                      player-ship-color))
+                      player-ship-color)
+  (render-effects renderer (player-effects player) player))
 
 (define (player-add-effect! player effect) :export
   (player-effects-set! player (cons effect (player-effects player))))
