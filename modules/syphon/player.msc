@@ -4,6 +4,7 @@
           (mesche string)
           (substratic input)
           (substratic window)
+          (substratic particle)
           (substratic physics)
           (substratic renderer)
           (syphon effect)
@@ -20,6 +21,7 @@
           held-item
           effects
           weapon
+          booster-particles
           fire-time
           shield-amount
           energy-amount))
@@ -32,6 +34,15 @@
                :state 'alive
                :held-item nil
                :effects '()
+               :booster-particles (make-particle-system
+                                   (make-particle-source :max-particles 40
+                                                         :geometry player-size
+                                                         :size '(7 10)
+                                                         :color (rgb 255 186 66)
+                                                         :interval '(0.05 0.08)
+                                                         :lifetime '(0.5 0.75)
+                                                         :vel-x '(-75 75)
+                                                         :vel-y '(250 300)))
                :sphere (make-sphere player-x player-y (/ player-size 2))
                :weapon (make-weapon :damage 10
                                     :bullet-speed 700
@@ -152,12 +163,23 @@
             (if (> (player-fire-time player) 0)
                 (player-fire-time-set! player (max 0
                                                    (- (player-fire-time player)
-                                                      time-delta))))))
+                                                      time-delta)))))
+
+        ;; Update the booster particle system
+        (particle-system-origin-set! (player-booster-particles player)
+                                     (- (player-x player)
+                                        (/ player-size 2))
+                                     (+ (/ player-size 2)
+                                        (player-y player)))
+        (particle-system-update (player-booster-particles player) time-delta))
 
       ;; We died
       (player-state-set! player 'died)))
 
 (define (render-player renderer player) :export
+  ;; Render the booster particles
+  (particle-system-render renderer (player-booster-particles player))
+
   (renderer-draw-rect renderer
                       (- (player-x player) (/ player-size 2))
                       (- (player-y player) (/ player-size 2))
