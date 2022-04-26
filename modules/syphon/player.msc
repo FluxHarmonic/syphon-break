@@ -38,6 +38,7 @@
                                    (make-particle-source :max-particles 40
                                                          :geometry player-size
                                                          :size '(7 10)
+                                                         :fade-speed 3.0
                                                          :color (rgb 255 186 66)
                                                          :interval '(0.05 0.08)
                                                          :lifetime '(0.5 0.75)
@@ -256,25 +257,40 @@
 ;;; Speed powerup
 
 (define speed-powerup-color (rgb 197 255 97))
+(define speed-powerup-particles nil)
 
 ;; TODO: Add a particle effect coming from behind the ship to make it look like
 ;; it has improved boosters
 (define (speed-powerup-effect-renderer renderer player)
-  (renderer-draw-rect renderer
-                      ;; Center the glyph below the player ship
-                      (+ 25 (- (player-x player) 15))
-                      (+ 15 (+ (player-y player) (/ player-size 2)))
-                      30 30
-                      speed-powerup-color))
+  ;; Render the particle effect
+  (particle-system-origin-set! speed-powerup-particles
+                               (- (player-x player)
+                                  (/ player-size 2))
+                               (- (player-y player)
+                                  (/ player-size 2)))
+  (particle-system-render renderer speed-powerup-particles))
 
 (define (make-speed-powerup-effect new-speed)
   (let ((current-time 0)
         (duration 5))
+    (set! speed-powerup-particles
+          (make-particle-system
+           (make-particle-source :max-particles 30
+                                 :geometry player-size
+                                 :size '(7 10)
+                                 :fade-speed 2.0
+                                 :color speed-powerup-color
+                                 :interval '(0.05 0.08)
+                                 :lifetime '(0.5 0.75)
+                                 :vel-x '(-90 90)
+                                 :vel-y 0)))
+
     (lambda (player enemies)
       (player-add-effect!
        player
        (make-effect :updater (lambda (player time-delta)
                                (set! current-time (+ current-time time-delta))
+                               (particle-system-update speed-powerup-particles time-delta)
                                (if (< current-time duration)
                                    (set! player-move-speed new-speed)
                                    (begin
