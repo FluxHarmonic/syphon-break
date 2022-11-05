@@ -15,7 +15,7 @@
                      (mesche-lib "substratic/engine"))
 
          :configs (list (config :name "dev"
-                                :default t
+                                :default #t
                                 :output-path "./bin/dev"
                                 :c-flags "-O0 -g -ggdb -DDEV_BUILD -fsanitize=address")
 
@@ -28,18 +28,33 @@
                                 :c-flags "-O2 -fPIE"))
 
          :tasks (list (task :name 'syphon-break:bin
-                                :default t
-                                :runs (steps
-                                       ;; Build library dependencies
-                                       (build-project "deps/mesche-lang/mesche/project.msc" :task 'mesche-compiler:lib)
-                                       (build-project "deps/substratic/engine/project.msc" :task "lib")
+                            :default #t
+                            :runs (steps
+                                   ;; Build library dependencies
+                                   (build-project "deps/mesche-lang/mesche/project.msc"
+                                                  :task 'mesche-compiler:lib
+                                                  :config (from-context 'config :name))
+                                   (build-project "deps/substratic/engine/project.msc"
+                                                  :task 'substratic-engine:lib
+                                                  :config (from-context 'config :name))
 
-                                       ;; Build the game source
-                                       (compile-source :source-files (list "main.c")
-                                                       :mesche-main "modules/main.msc")
+                                   ;; Build the game source
+                                   (compile-source :source-files (list "main.c")
+                                                   :mesche-main "modules/main.msc"
+                                                   :c-flags (from-context '(config
+                                                                            mesche-compiler:lib
+                                                                            substratic-engine:lib)
+                                                                          :c-flags))
 
-                                       ;; Build and link CLI source files
-                                       (link-program "syphon-break")))
+                                   ;; Build and link CLI source files
+                                   (link-program :name "syphon-break"
+                                                 :input-files (collect '((syphon-break:bin/compile-source :object-files)
+                                                                         (mesche-compiler:lib :library-path)
+                                                                         (substratic-engine:lib :library-path)))
+                                                 :c-libs (from-context '(config
+                                                                         substratic-engine:lib
+                                                                         mesche-compiler:lib)
+                                                                       :c-libs))))
 
                       (task :name 'syphon-break:dist
                             :runs (steps (build-task 'syphon-break:bin)
@@ -53,4 +68,4 @@
                                            (process-start-sync "cp -R ./modules ./dist")
                                            (process-start-sync "cp -R ./assets ./dist")
                                            (process-start-sync "cp -R ./deps/substratic/engine/modules/substratic ./dist/modules")
-                                           nil)))))
+                                           #f)))))
