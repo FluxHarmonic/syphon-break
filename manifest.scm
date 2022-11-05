@@ -6,7 +6,6 @@
    "make"
    "pkg-config"
    "gdb"
-   "cmake"
    "zlib"
 
    ;; Command line tools
