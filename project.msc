@@ -11,7 +11,7 @@
          :version "0.0.1"
          :description "How long can you survive before energy runs out?"
 
-         :deps (list (mesche-lib "mesche-lang/compiler")
+         :deps (list (mesche-lib "mesche-lang/mesche")
                      (mesche-lib "substratic/engine"))
 
          :configs (list (config :name "dev"
@@ -27,12 +27,12 @@
                                 :output-path "./bin/release"
                                 :c-flags "-O2 -fPIE"))
 
-         :targets (list (target :name "main"
+         :tasks (list (task :name 'syphon-break:bin
                                 :default t
                                 :runs (steps
                                        ;; Build library dependencies
-                                       (build-project "deps/mesche-lang/compiler/project.msc" :target "lib")
-                                       (build-project "deps/substratic/engine/project.msc" :target "lib")
+                                       (build-project "deps/mesche-lang/mesche/project.msc" :task 'mesche-compiler:lib)
+                                       (build-project "deps/substratic/engine/project.msc" :task "lib")
 
                                        ;; Build the game source
                                        (compile-source :source-files (list "main.c")
@@ -41,16 +41,16 @@
                                        ;; Build and link CLI source files
                                        (link-program "syphon-break")))
 
-                        (target :name "dist"
-                                :runs (steps (build-target "main")
-                                             (lambda (project config outputs)
-                                               ;; TODO: Clean existing dist folder?
-                                               (path-ensure "./dist")
-                                               (process-start-sync (string-append "cp "
-                                                                                  (project-config-output-path config)
-                                                                                  "/syphon-break "
-                                                                                  "dist/"))
-                                               (process-start-sync "cp -R ./modules ./dist")
-                                               (process-start-sync "cp -R ./assets ./dist")
-                                               (process-start-sync "cp -R ./deps/substratic/engine/modules/substratic ./dist/modules")
-                                               nil)))))
+                      (task :name 'syphon-break:dist
+                            :runs (steps (build-task 'syphon-break:bin)
+                                         (lambda (project config outputs)
+                                           ;; TODO: Clean existing dist folder?
+                                           (path-ensure "./dist")
+                                           (process-start-sync (string-append "cp "
+                                                                              (project-config-output-path config)
+                                                                              "/syphon-break "
+                                                                              "dist/"))
+                                           (process-start-sync "cp -R ./modules ./dist")
+                                           (process-start-sync "cp -R ./assets ./dist")
+                                           (process-start-sync "cp -R ./deps/substratic/engine/modules/substratic ./dist/modules")
+                                           nil)))))
