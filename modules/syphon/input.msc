@@ -10,14 +10,14 @@
           use-item))
 
 (define (create-controller) :export
-  (make-controller :up nil
-                   :down nil
-                   :left nil
-                   :right nil
-                   :fire nil
-                   :siphon nil
-                   :use-item nil
-                   :shield nil))
+  (make-controller :up #f
+                   :down #f
+                   :left #f
+                   :right #f
+                   :fire #f
+                   :siphon #f
+                   :use-item #f
+                   :shield #f))
 
 (define (up-command controller input-event)
   (controller-up-set! controller

@@ -10,7 +10,7 @@
 
 (define (fire-weapon weapon x y y-dir time-delta owner) :export
   (make-bullet :x x :y y
-               :alive t
+               :alive #t
                :vel-y (* y-dir (weapon-bullet-speed weapon))
                :sphere (make-sphere x y (/ bullet-size 2))
                :damage (weapon-damage weapon)

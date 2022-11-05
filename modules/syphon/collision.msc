@@ -19,7 +19,7 @@
                       (if (sphere-intersect? (bullet-sphere bullet)
                                              (enemy-sphere (car enemies)))
                           (begin
-                            (bullet-alive-set! bullet nil)
+                            (bullet-alive-set! bullet #f)
                             (enemy-shield-set! (car enemies)
                                                (- (enemy-shield (car enemies))
                                                   (bullet-damage bullet)))
@@ -30,7 +30,7 @@
                   (if (sphere-intersect? (bullet-sphere bullet)
                                          (player-sphere player))
                       (begin
-                        (bullet-alive-set! bullet nil)
+                        (bullet-alive-set! bullet #f)
                         (player-shield-amount-set! player
                                                    (- (player-shield-amount player)
                                                       (bullet-damage bullet)))))))
@@ -45,6 +45,6 @@
               (begin
                 ;; Remove the powerup from the screen and add its effect to the
                 ;; player
-                (powerup-alive-set! (car powerups) nil)
+                (powerup-alive-set! (car powerups) #f)
                 ((powerup-applicator (car powerups)) player enemies)))
           (next-powerup (cdr powerups))))))

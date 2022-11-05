@@ -293,7 +293,7 @@
             (handle-input-events current-game))
 
         ;; Make sure we don't exit the game loop
-        t)))
+        #t)))
 
 (define you-died-text "YOU DIED")
 (define you-died-width (font-text-width result-font you-died-text))
@@ -304,8 +304,8 @@
 (define prompt-text "Play Again? (Y/N)")
 (define prompt-width (font-text-width prompt-font prompt-text))
 
-(define result-text nil)
-(define result-width nil)
+(define result-text #f)
+(define result-width #f)
 
 (define (game-renderer renderer)
   ;; Render the bullets
@@ -373,7 +373,7 @@
                 (not (equal? (input-event-key-code input-event)
                              input-key-code-q)))
             (next-event (input-event-take input-state)))
-        t)))
+        #t)))
 
 (define menu-screen-lines
   (list "Instructions:"
@@ -422,7 +422,7 @@
 (define current-updater menu-updater)
 (define current-renderer menu-renderer)
 
-;; This will run the game functions until the updater returns nil
+;; This will run the game functions until the updater returns #f
 (run-engine-loop :renderer renderer
                  :update-func (lambda (time-delta)
                                 (if (not (window-needs-close? window))

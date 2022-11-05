@@ -32,7 +32,7 @@
                :vel-x 0
                :vel-y 0
                :state 'alive
-               :held-item nil
+               :held-item #f
                :effects '()
                :booster-particles (make-particle-system
                                    (make-particle-source :max-particles 40
@@ -63,7 +63,7 @@
 (define (player-fire-weapon player weapon new-bullet-func time-delta)
   (if (<= (player-fire-time player) 0)
       ;; TODO: Why is there a heap overflow when this is a `begin`?
-      (let ((foo t))
+      (let ((foo #t))
         ;; Delay the next fire by the fire rate
         (player-fire-time-set! player (weapon-fire-rate weapon))
 
@@ -204,7 +204,7 @@
         ((item-applicator (player-held-item player)) player enemies)
 
         ;; Clear the held item
-        (player-held-item-set! player nil))))
+        (player-held-item-set! player #f))))
 
 (define (player-item-applicator item)
   ;; TODO: Draw this in the HUD!
@@ -248,7 +248,7 @@
                   :y y
                   :vel-x 0
                   :vel-y 300
-                  :alive t
+                  :alive #t
                   :color (rgb 255 135 84)
                   :size size
                   :sphere (make-sphere x y (/ size 2))
@@ -257,7 +257,7 @@
 ;;; Speed powerup
 
 (define speed-powerup-color (rgb 197 255 97))
-(define speed-powerup-particles nil)
+(define speed-powerup-particles #f)
 
 ;; TODO: Add a particle effect coming from behind the ship to make it look like
 ;; it has improved boosters
@@ -294,10 +294,10 @@
                                (if (< current-time duration)
                                    (set! player-move-speed new-speed)
                                    (begin
-                                     ;; Set the speed back to default and return nil to
+                                     ;; Set the speed back to default and return #f to
                                      ;; remove the effect
                                      (set! player-move-speed player-default-move-speed)
-                                     nil)))
+                                     #f)))
                     :renderer speed-powerup-effect-renderer)))))
 
 (define (spawn-speed-powerup window) :export
@@ -308,7 +308,7 @@
                   :y y
                   :vel-x 0
                   :vel-y 500
-                  :alive t
+                  :alive #t
                   :color speed-powerup-color
                   :size size
                   :sphere (make-sphere x y (/ size 2))
@@ -362,7 +362,7 @@
                   :y y
                   :vel-x 0
                   :vel-y 500
-                  :alive t
+                  :alive #t
                   :color heatwave-powerup-color
                   :size size
                   :sphere (make-sphere x y (/ size 2))
